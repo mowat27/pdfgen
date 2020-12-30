@@ -11,9 +11,9 @@ target/google.pdf: target
 	python -m generate "https://www.google.com/" target/google.pdf
 	open target/google.pdf
 
-target/basic.pdf: target
-	python -m generate www/basic/index.html target/basic.pdf
-	open target/basic.pdf
+target/newspaper.pdf: target
+	python -m generate www/newspaper/index.html target/newspaper.pdf
+	open target/newspaper.pdf
 
 target: 
 	mkdir -p target
