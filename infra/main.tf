@@ -15,6 +15,15 @@ provider "aws" {
 resource "aws_s3_bucket" "this" {
   bucket_prefix = "pdfgen-"
   acl = "private"
+  force_destroy = true
+
+  lifecycle_rule {
+    id = "expiration"
+    enabled = true
+    expiration {
+      days = 7
+    }
+  }
   
   tags = {
     Name        = "pdfgen ${var.environment}"
