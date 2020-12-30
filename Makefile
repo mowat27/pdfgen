@@ -7,12 +7,26 @@ SHELL:=bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
-.PHONY: newspaper server
+.PHONY: newspaper server plan apply apply!
 
 newspaper: 
 	bin/generate.sh www/newspaper/index.html
 
-
 server:
 	python -m http.server --directory www
+
+plan:
+	cd infra && terraform apply
+
+apply:
+	cd infra && terraform apply
+
+apply!:
+	cd infra && terraform apply --auto-approve
+
+destroy:
+	cd infra && terraform destroy
+
+destroy!:
+	cd infra && terraform destroy --auto-approve
 
