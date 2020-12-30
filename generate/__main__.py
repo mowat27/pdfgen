@@ -18,8 +18,15 @@ if source.startswith("http"):
 else:
     options = {'enable-local-file-access': None}
     pdf = pdfkit.from_file(source, False, options=options)
+
     s3 = boto3.resource('s3')
     filename = f'generated-{uuid.uuid4()}.pdf'
     obj = s3.Object(S3_BUCKET_FOR_OUTPUT, filename)
-    obj.put(Body=pdf)
+    obj.put(Body=pdf, Metadata={
+        "metadata-version": "0.1",
+        "generated-by": "pdfgen",
+        "callback-url": "https://example.com/docid"
+    })
     print(f'Created s3://{S3_BUCKET_FOR_OUTPUT}/{filename}')
+    print("aws s3api head-object --bucket",
+          S3_BUCKET_FOR_OUTPUT,  "--key", filename)
