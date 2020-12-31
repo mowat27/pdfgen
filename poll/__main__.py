@@ -18,6 +18,17 @@ def exit_with_style(signal_received, frame):
 signal(SIGINT, exit_with_style)
 
 
+class Response:
+    def __init__(self, queue, response):
+        self.queue = queue
+        self.response = response
+
+    def __iter__(self):
+        if 'Messages' in self.response:
+            for message in self.response['Messages']:
+                yield message
+
+
 class Queue:
     default_sqs_options = {
         "AttributeNames": [
@@ -31,23 +42,23 @@ class Queue:
         "WaitTimeSeconds": 10
     }
 
-    def __init__(self, queue_url, *, handlers=None):
+    def __init__(self, queue_url, *, handlers=None, sqs_options=None):
         self.queue_url = queue_url
         self.handlers = handlers or []
+        self.sqs_options = dict(self.default_sqs_options)  # makes a copy
+        self.sqs_options.update(sqs_options or {})
 
     def add_handler(self, f):
         self.handlers.append(f)
 
-    def start_poller(self, *, poll_interval=1, sqs_options=None):
-        options = dict(self.default_sqs_options)  # makes a copy
-        options.update(sqs_options or {})
+    def __next__(self):
+        return sqs.receive_message(QueueUrl=self.queue_url, **self.sqs_options)
 
+    def start_poller(self, *, poll_interval=1, sqs_options=None):
         while True:
-            response = sqs.receive_message(QueueUrl=self.queue_url, **options)
-            if 'Messages' in response:
-                for message in response['Messages']:
-                    for handler in self.handlers:
-                        handler(message)
+            for message in Response(self, next(self)):
+                for handler in self.handlers:
+                    handler(message)
 
                 sqs.delete_message(
                     QueueUrl=self.queue_url,
