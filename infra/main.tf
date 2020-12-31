@@ -12,29 +12,6 @@ provider "aws" {
   region = var.aws_region
 }
 
-# -- SNS -----------------------------------------------------------------------
-
-resource "aws_sns_topic" "this" {
-  name_prefix = "pdfgen-"
-
-policy = <<POLICY
-{
-    "Version":"2012-10-17",
-    "Statement":[{
-        "Effect": "Allow",
-        "Principal": {
-            "Service": "s3.amazonaws.com"
-            },
-        "Action": "SNS:Publish",
-        "Resource": "arn:aws:sns:${var.aws_region}:${var.aws_account}:pdfgen-*",
-        "Condition":{
-            "ArnLike":{"aws:SourceArn":"${aws_s3_bucket.this.arn}"}
-        }
-    }]
-}
-POLICY
-}
-
 # -- SQS -----------------------------------------------------------------------
 
 resource "aws_sqs_queue" "output" {
