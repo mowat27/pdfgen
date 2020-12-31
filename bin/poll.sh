@@ -9,8 +9,5 @@ tf_output=$(terraform output -json)
 
 cd .. 
 
-export S3_BUCKET_FOR_OUTPUT=$(echo "$tf_output" | jq -r '. | .bucket_name.value')
-python -m generate "$@"
-
-
-
+export SQS_OUTPUT_QUEUE=$(echo "$tf_output" | jq -r '. | .output_queue.value')
+python -m poll "$@"
