@@ -19,46 +19,6 @@ def exit_with_style(signal_received, frame):
 signal(SIGINT, exit_with_style)
 
 
-class S3Object:
-    def __init__(self, record):
-        self.record = record
-
-    @property
-    def bucket(self):
-        return self.record["s3"]["bucket"]["name"]
-
-    @property
-    def key(self):
-        return self.record["s3"]["object"]["key"]
-
-    @property
-    def filename(self):
-        return os.path.basename(self.key)
-
-    @property
-    def prefix(self):
-        return os.path.dirname(self.key)
-
-    @property
-    def s3_url(self):
-        return f's3://{self.bucket}{self.prefix}/{self.filename}'
-
-    @property
-    def metadata(self):
-        return s3.head_object(Bucket=self.bucket, Key=self.key)
-
-
-class Response:
-    def __init__(self, queue, response):
-        self.queue = queue
-        self.response = response
-
-    def __iter__(self):
-        if 'Messages' in self.response:
-            for message in self.response['Messages']:
-                yield message
-
-
 class Queue:
     default_sqs_options = {
         "AttributeNames": [
@@ -95,6 +55,46 @@ class Queue:
                     ReceiptHandle=message['ReceiptHandle'])
 
             time.sleep(poll_interval)
+
+
+class Response:
+    def __init__(self, queue, response):
+        self.queue = queue
+        self.response = response
+
+    def __iter__(self):
+        if 'Messages' in self.response:
+            for message in self.response['Messages']:
+                yield message
+
+
+class S3Object:
+    def __init__(self, record):
+        self.record = record
+
+    @property
+    def bucket(self):
+        return self.record["s3"]["bucket"]["name"]
+
+    @property
+    def key(self):
+        return self.record["s3"]["object"]["key"]
+
+    @property
+    def filename(self):
+        return os.path.basename(self.key)
+
+    @property
+    def prefix(self):
+        return os.path.dirname(self.key)
+
+    @property
+    def s3_url(self):
+        return f's3://{self.bucket}{self.prefix}/{self.filename}'
+
+    @property
+    def metadata(self):
+        return s3.head_object(Bucket=self.bucket, Key=self.key)
 
 
 def stdout_logger(message):
