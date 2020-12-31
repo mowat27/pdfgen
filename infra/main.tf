@@ -14,6 +14,19 @@ provider "aws" {
 
 # -- SQS -----------------------------------------------------------------------
 
+resource "aws_sqs_queue" "input" {
+  name_prefix = "pdfgen-input-"
+  
+  visibility_timeout_seconds = 30
+  message_retention_seconds = 60
+
+  receive_wait_time_seconds = 10
+
+  tags = {
+    Environment = "dev"
+  }
+}
+
 resource "aws_sqs_queue" "output" {
   name_prefix = "pdfgen-output-"
   
