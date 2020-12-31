@@ -1,10 +1,11 @@
-import boto3
 import json
+import os
 import time
+from signal import SIGINT, signal
 
-from signal import signal, SIGINT
+import boto3
 
-from . import SQS_OUTPUT_QUEUE, POLL_INTERVAL_SECONDS
+from . import POLL_INTERVAL_SECONDS, SQS_OUTPUT_QUEUE
 
 sqs = boto3.client('sqs')
 s3 = boto3.client('s3')
@@ -16,6 +17,35 @@ def exit_with_style(signal_received, frame):
 
 
 signal(SIGINT, exit_with_style)
+
+
+class S3Object:
+    def __init__(self, record):
+        self.record = record
+
+    @property
+    def bucket(self):
+        return self.record["s3"]["bucket"]["name"]
+
+    @property
+    def key(self):
+        return self.record["s3"]["object"]["key"]
+
+    @property
+    def filename(self):
+        return os.path.basename(self.key)
+
+    @property
+    def prefix(self):
+        return os.path.dirname(self.key)
+
+    @property
+    def s3_url(self):
+        return f's3://{self.bucket}{self.prefix}/{self.filename}'
+
+    @property
+    def metadata(self):
+        return s3.head_object(Bucket=self.bucket, Key=self.key)
 
 
 class Response:
@@ -70,12 +100,8 @@ class Queue:
 def stdout_logger(message):
     body = json.loads(message['Body'])
 
-    for record in body['Records']:
-        bucket = record["s3"]["bucket"]["name"]
-        key = record["s3"]["object"]["key"]
-
-        metadata = s3.head_object(Bucket=bucket, Key=key)
-        log = f"object=s3://{bucket}/{key} callback={metadata['Metadata']['callback-url']}"
+    for obj in [S3Object(record) for record in body['Records']]:
+        log = f"object={obj.s3_url} callback={obj.metadata['Metadata']['callback-url']}"
         print(log)
 
 
