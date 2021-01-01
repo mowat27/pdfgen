@@ -29,6 +29,9 @@ build!:
 generator.shell: 
 	docker-compose exec generator /bin/bash
 
+notifier.shell: 
+	docker-compose exec notifier /bin/bash
+
 # -- Local Development ---------------------------------------------------------
 
 .PHONY: newspaper server
