@@ -1,15 +1,11 @@
-import json
-import os
+
 import time
 from signal import SIGINT, signal
 
-from aws import sqs
+from aws import sqs, s3
 
-import boto3
 
 from . import POLL_INTERVAL_SECONDS, SQS_OUTPUT_QUEUE
-
-s3 = boto3.client('s3')
 
 
 def exit_with_style(signal_received, frame):
@@ -20,37 +16,8 @@ def exit_with_style(signal_received, frame):
 signal(SIGINT, exit_with_style)
 
 
-class S3Object:
-    def __init__(self, record):
-        self.record = record
-
-    @ property
-    def bucket(self):
-        return self.record["s3"]["bucket"]["name"]
-
-    @ property
-    def key(self):
-        return self.record["s3"]["object"]["key"]
-
-    @ property
-    def filename(self):
-        return os.path.basename(self.key)
-
-    @ property
-    def prefix(self):
-        return os.path.dirname(self.key)
-
-    @ property
-    def s3_url(self):
-        return f's3://{self.bucket}{self.prefix}/{self.filename}'
-
-    @ property
-    def metadata(self):
-        return s3.head_object(Bucket=self.bucket, Key=self.key)
-
-
 def stdout_logger(message):
-    for obj in [S3Object(record) for record in message.records]:
+    for obj in [s3.S3Object(record) for record in message.records]:
         log = f"object={obj.s3_url} callback={obj.metadata['Metadata']['callback-url']}"
         print(log)
 
