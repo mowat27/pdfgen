@@ -8,7 +8,7 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 DOCKER_BUILD_SENTINAL := docker_build.sentinal
-DOCKER_IMAGE := pdfgen-generate:latest
+DOCKER_IMAGE := mowat27/pdfgen-generate:latest
 INIT_SCRIPT := lib/init.sh
 
 PYFILES := $(shell find . -type f -name '*.py'  -maxdepth 1) 
