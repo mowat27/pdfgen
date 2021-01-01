@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>{{ content.name }}</title>
+    <link rel="stylesheet" href="simple.css">
+</head>
+<body>
+    <h1>{{ content.title }}</h1>
+    <div class="content">
+      {% for paragraph in content.content.split("\n") %}
+        <p>{{ paragraph }}</p>
+      {% endfor %}
+    </div>
+</body>
+</html>
