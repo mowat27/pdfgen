@@ -22,17 +22,17 @@ def make_pdf(source):
 
 def upload_to_s3(pdf, bucket):
     key = f'generated-{uuid.uuid4()}.pdf'
-    s3_object = s3.save(pdf, bucket, key, metadata={
+    return s3.save(pdf, bucket, key, metadata={
         "version": "0.1",
         "generated_by": "pdfgen",
         "callback_url": "https://example.com/docid"
     })
-    print(f'Created: {s3_object.s3_url}')
-    print(f'Metadata: {s3_object.metadata.values}')
 
 
 if source.startswith("http"):
     sys.exit("Generating pdfs from URLs is not currently supported")
 else:
     pdf = make_pdf(source)
-    upload_to_s3(pdf, S3_BUCKET_FOR_OUTPUT)
+    s3_object = upload_to_s3(pdf, S3_BUCKET_FOR_OUTPUT)
+    print(f'Created: {s3_object.s3_url}')
+    print(f'Metadata: {s3_object.metadata.values}')
