@@ -9,10 +9,6 @@ def make(source):
     return pdfkit.from_file(source, False, options=options)
 
 
-def upload_to_s3(pdf, bucket):
+def upload_to_s3(document, bucket, metadata=None):
     key = f'generated-{uuid.uuid4()}.pdf'
-    return s3.save(pdf, bucket, key, metadata={
-        "version": "0.1",
-        "generated_by": "pdfgen",
-        "callback_url": "https://example.com/docid"
-    })
+    return s3.save(document, bucket, key, metadata=metadata)
