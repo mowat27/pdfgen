@@ -9,16 +9,19 @@ MAKEFLAGS += --no-builtin-rules
 
 # -- Docker --------------------------------------------------------------------
 
-.PHONY: up up! generator
+.PHONY: up up! generator.shell
 
-up: generator
+up: 
 	docker-compose up
+
+down: 
+	docker-compose down
 
 up!:
 	docker-compose up -d
 
-generator:	
-	cd generate && make clean image
+generator.shell: 
+	docker-compose exec generator /bin/bash
 
 # -- Local Development ---------------------------------------------------------
 

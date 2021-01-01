@@ -1,4 +1,6 @@
 version: "3.9"
 services:
   generator:
-    image: mowat27/pdfgen-generate:latest
+    build: ./generator
+    volumes: 
+      - ./:/usr/src/app
