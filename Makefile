@@ -7,13 +7,35 @@ SHELL:=bash
 MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
-.PHONY: newspaper server plan apply apply!
+# -- Docker --------------------------------------------------------------------
+
+.PHONY: up up! generator.shell
+
+up: 
+	docker-compose up
+
+down: 
+	docker-compose down
+
+up!:
+	docker-compose up -d
+
+generator.shell: 
+	docker-compose exec generator /bin/bash
+
+# -- Local Development ---------------------------------------------------------
+
+.PHONY: newspaper server
 
 newspaper: 
 	bin/generate.sh www/newspaper/index.html
 
 server:
 	python -m http.server --directory www
+
+# -- Infrastructure ------------------------------------------------------------
+
+.PHONY: plan apply apply!
 
 plan:
 	cd infra && terraform apply

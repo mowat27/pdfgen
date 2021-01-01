@@ -1,9 +1,7 @@
-
 import time
 from signal import SIGINT, signal
 
-from aws import sqs, s3
-
+from aws import s3, sqs
 
 from . import POLL_INTERVAL_SECONDS, SQS_OUTPUT_QUEUE
 
@@ -22,17 +20,8 @@ def stdout_logger(message):
         print(log)
 
 
-def start_poller(queue, *, poll_interval=1, handlers=[]):
-    while True:
-        for message in next(queue).messages():
-            for handler in handlers:
-                handler(message)
-            queue.delete_message(message.receipt_handle)
-        time.sleep(poll_interval)
-
-
-queue = sqs.Queue(SQS_OUTPUT_QUEUE)
 print('Starting...')
 print(f'Polling Interval: {POLL_INTERVAL_SECONDS} second(s)')
-start_poller(queue, poll_interval=POLL_INTERVAL_SECONDS,
-             handlers=[stdout_logger])
+sqs.poller.start(queue=SQS_OUTPUT_QUEUE,
+                 poll_interval=POLL_INTERVAL_SECONDS,
+                 handlers=[stdout_logger])
