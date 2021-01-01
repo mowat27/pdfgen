@@ -6,16 +6,15 @@ s3 = boto3.client('s3')
 
 
 class S3Object:
-    def __init__(self, record):
-        self.record = record
+    @classmethod
+    def from_sqs_record(cls, record):
+        bucket = record["s3"]["bucket"]["name"]
+        key = record["s3"]["object"]["key"]
+        return cls(bucket, key)
 
-    @ property
-    def bucket(self):
-        return self.record["s3"]["bucket"]["name"]
-
-    @ property
-    def key(self):
-        return self.record["s3"]["object"]["key"]
+    def __init__(self, bucket, key):
+        self.bucket = bucket
+        self.key = key
 
     @ property
     def filename(self):
