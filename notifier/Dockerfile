@@ -1,9 +1,5 @@
 FROM python:3.9.0-slim-buster
 
-RUN apt-get update && apt-get install -y \
-  wkhtmltopdf \
-  && rm -rf /var/lib/apt/lists/*
-
 RUN mkdir /usr/src/app 
 WORKDIR /usr/src/app
 
@@ -13,4 +9,4 @@ RUN python -m pip install --upgrade pip && \
 
 COPY . .
 
-CMD [ "python", "-m", "generator.daemon" ]
+CMD [ "python", "-m", "notifier" ]

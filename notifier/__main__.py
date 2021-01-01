@@ -1,3 +1,4 @@
+import sys
 from signal import SIGINT, signal
 
 import requests
@@ -24,6 +25,13 @@ def get_s3_objects(message):
     ]
 
 
+def log(message, error=False):
+    if error:
+        print(message, file=sys.stderr, flush=True)
+    else:
+        print(message, flush=True)
+
+
 def send_documents(message):
     for obj in get_s3_objects(message):
         signed_url = create_presigned_url(
@@ -34,17 +42,22 @@ def send_documents(message):
         callback = obj.metadata['callback_url']
 
         if signed_url is not None:
-            response = requests.put(callback, data={'url': signed_url})
-            if response.status_code == 200:
-                print(f'Notified {callback}')
-                print(f'  S3 Object: {obj.s3_url}')
-                print(f'  Signed url: {signed_url}')
-            elif response.status_code == 404:
-                print(f'{callback} Not Found.')
-            else:
-                print(f'{callback} returned status {response.status_code}')
+            log(f'Notifying {callback}')
+            try:
+                response = requests.put(callback, data={'url': signed_url})
+                if response.status_code == 200:
+                    log(f'SUCCESS: Notified {callback}')
+                    log(f'  S3 Object: {obj.s3_url}')
+                    log(f'  Signed url: {signed_url}')
+                elif response.status_code == 404:
+                    log(f'{callback} Not Found.', error=True)
+                else:
+                    log(f'{callback} returned status {response.status_code}', error=True)
+            except requests.ConnectionError as e:
+                log(f'ERROR: Could not connect ', error=True)
+                log(f'ERROR: {e}', error=True)
         else:
-            print('failed to generate signed url')
+            log('Failed to generate signed url', error=True)
 
 
 print('Starting Notifier...')
