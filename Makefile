@@ -9,7 +9,7 @@ MAKEFLAGS += --no-builtin-rules
 
 # -- Docker --------------------------------------------------------------------
 
-.PHONY: up up! generator.shell
+.PHONY: up up! down build build! generator.shell
 
 up: 
 	docker-compose up
@@ -19,6 +19,12 @@ down:
 
 up!:
 	docker-compose up -d
+
+build:
+	docker-compose build
+
+build!:
+	docker-compose build --no-cache
 
 generator.shell: 
 	docker-compose exec generator /bin/bash
@@ -52,5 +58,5 @@ destroy:
 destroy!:
 	cd infra && terraform destroy --auto-approve
 
-.env: 
-	bin/make_env.sh infra
+.env: apply!
+	bin/make_env.sh

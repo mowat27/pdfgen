@@ -6,4 +6,5 @@ services:
       dockerfile: generator/Dockerfile
     volumes: 
       - ./:/usr/src/app
+      - ~/.aws:/root/.aws
     env_file: .env

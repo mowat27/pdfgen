@@ -1,3 +1,13 @@
+output "aws_region" {
+  description = "Region to which the resources were deployed"
+  value = var.aws_region
+}
+
+output "aws_profile" {
+  description = "AWS profile used to create the resources"
+  value = var.aws_profile
+}
+
 output "bucket_name" {
   description = "Bucket in which pdfs are generated"
   value = aws_s3_bucket.this.id
