@@ -5,8 +5,9 @@ from signal import SIGINT, signal
 import jinja2
 from aws import s3, sqs
 
+import pdfkit
 from .. import pdf
-from . import POLL_INTERVAL_SECONDS, SQS_INPUT_QUEUE
+from . import POLL_INTERVAL_SECONDS, SQS_INPUT_QUEUE, S3_BUCKET_FOR_OUTPUT
 
 
 def shutdown(signal, frame):
@@ -26,6 +27,9 @@ def maker(message):
 
     with open('templates/index.html', 'w') as f:
         f.write(html)
+
+    document = pdfkit.from_string(html, False)
+    pdf.upload_to_s3(document, S3_BUCKET_FOR_OUTPUT)
 
 
 def logger(message):
