@@ -35,7 +35,7 @@ server:
 
 # -- Infrastructure ------------------------------------------------------------
 
-.PHONY: plan apply apply!
+.PHONY: plan apply apply! .env
 
 plan:
 	cd infra && terraform apply
@@ -52,3 +52,5 @@ destroy:
 destroy!:
 	cd infra && terraform destroy --auto-approve
 
+.env: 
+	bin/make_env.sh infra

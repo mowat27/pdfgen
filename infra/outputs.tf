@@ -5,7 +5,7 @@ output "bucket_name" {
 
 output "input_queue" {
   description = "SQS queue polled for pdf requests"
-  value = aws_sqs_queue.input
+  value = aws_sqs_queue.input.id
 }
 
 output "output_queue" {

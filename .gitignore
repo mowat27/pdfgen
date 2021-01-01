@@ -4,6 +4,7 @@ tmp
 *.pdf
 .vscode
 *.sentinal
+.env
 
 # ignore this so I don't commit details about my aws config
 terraform.tfvars 
