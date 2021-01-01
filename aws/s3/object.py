@@ -30,4 +30,21 @@ class S3Object:
 
     @ property
     def metadata(self):
-        return s3.head_object(Bucket=self.bucket, Key=self.key)
+        response = s3.head_object(Bucket=self.bucket, Key=self.key)
+        return Metadata(response)
+
+
+class Metadata:
+    def __init__(self, response):
+        self.response = response
+
+    @property
+    def values(self):
+        return self.response['Metadata']
+
+    @property
+    def raw(self):
+        return self.response
+
+    def __getitem__(self, key):
+        return self.values[key]

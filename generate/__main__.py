@@ -23,12 +23,12 @@ def make_pdf(source):
 def upload_to_s3(pdf, bucket):
     key = f'generated-{uuid.uuid4()}.pdf'
     s3_object = s3.save(pdf, bucket, key, metadata={
-        "metadata-version": "0.1",
-        "generated-by": "pdfgen",
-        "callback-url": "https://example.com/docid"
+        "version": "0.1",
+        "generated_by": "pdfgen",
+        "callback_url": "https://example.com/docid"
     })
     print(f'Created: {s3_object.s3_url}')
-    print(f'Metadata: {s3_object.metadata}')
+    print(f'Metadata: {s3_object.metadata.values}')
 
 
 if source.startswith("http"):

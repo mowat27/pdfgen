@@ -18,7 +18,7 @@ signal(SIGINT, exit_with_style)
 
 def stdout_logger(message):
     for obj in [s3.S3Object.from_sqs_record(record) for record in message.records]:
-        log = f"object={obj.s3_url} callback={obj.metadata['Metadata']['callback-url']}"
+        log = f"object={obj.s3_url} callback={obj.metadata['callback_url']}"
         print(log)
 
 
