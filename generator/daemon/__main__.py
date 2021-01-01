@@ -1,3 +1,4 @@
+import pathlib
 import json
 import time
 from signal import SIGINT, signal
@@ -41,10 +42,15 @@ def maker(message):
         })
 
 
+def mkdir_p(path):
+    pathlib.Path(path).mkdir(parents=True, exist_ok=True)
+
+
 def debug_file_maker(message):
     content = json.loads(message.body['document']['content'])
     html = make_html('./templates/simple.html.j2', content)
-    with open('templates/index.html', 'w') as f:
+    mkdir_p('./www/debug')
+    with open('./www/debug/index.html', 'w') as f:
         f.write(html)
 
 
