@@ -18,24 +18,34 @@ def shutdown(signal, frame):
 signal(SIGINT, shutdown)
 
 
-def maker(message):
-    content = json.loads(message.body['document']['content'])
-    creator = message.body['generated_by']
-    callback = message.body['callback_url']
-
-    with open('./templates/simple.html.j2', 'r') as f:
+def make_html(template, content):
+    with open(template, 'r') as f:
         template = jinja2.Template(f.read())
 
-    html = template.render(content=content)
+    return template.render(content=content)
 
+
+def pdf_from_html(html):
+    return pdfkit.from_string(html, False)
+
+
+def maker(message):
+    content = json.loads(message.body['document']['content'])
+    html = make_html('./templates/simple.html.j2', content)
+    pdf.upload_to_s3(
+        document=pdf_from_html(html),
+        bucket=S3_BUCKET_FOR_OUTPUT,
+        metadata={
+            'creator': message.body['generated_by'],
+            'callback_url': message.body['callback_url']
+        })
+
+
+def debug_file_maker(message):
+    content = json.loads(message.body['document']['content'])
+    html = make_html('./templates/simple.html.j2', content)
     with open('templates/index.html', 'w') as f:
         f.write(html)
-
-    document = pdfkit.from_string(html, False)
-    pdf.upload_to_s3(document, S3_BUCKET_FOR_OUTPUT, metadata={
-        'creator': creator,
-        'callback_url': callback
-    })
 
 
 def logger(message):
@@ -46,4 +56,4 @@ def logger(message):
 
 sqs.poller.start(queue=SQS_INPUT_QUEUE,
                  poll_interval=POLL_INTERVAL_SECONDS,
-                 handlers=[maker, logger])
+                 handlers=[maker, logger, debug_file_maker])
