@@ -4,6 +4,7 @@ import boto3
 import uuid
 
 from . import S3_BUCKET_FOR_OUTPUT
+from aws import s3
 
 if len(sys.argv) < 2:
     sys.exit("Please pass source file")
@@ -20,18 +21,14 @@ def make_pdf(source):
 
 
 def upload_to_s3(pdf, bucket):
-    s3 = boto3.resource('s3')
-    filename = f'generated-{uuid.uuid4()}.pdf'
-    obj = s3.Object(bucket, filename)
-
-    obj.put(Body=pdf, Metadata={
+    key = f'generated-{uuid.uuid4()}.pdf'
+    s3_object = s3.save(pdf, bucket, key, metadata={
         "metadata-version": "0.1",
         "generated-by": "pdfgen",
         "callback-url": "https://example.com/docid"
     })
-
-    print(f'Created s3://{bucket}/{filename}')
-    print("aws s3api head-object --bucket", bucket,  "--key", filename)
+    print(f'Created: {s3_object.s3_url}')
+    print(f'Metadata: {s3_object.metadata}')
 
 
 if source.startswith("http"):
