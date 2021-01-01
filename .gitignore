@@ -2,6 +2,7 @@
 
 tmp
 *.pdf
+.vscode
 
 # ignore this so I don't commit details about my aws config
 terraform.tfvars 
