@@ -62,3 +62,8 @@ class Message:
     @ property
     def receipt_handle(self):
         return self.message['ReceiptHandle']
+
+    def __repr__(self):
+        cls = self.__class__.__name__
+        keys = ", ".join(self.body.keys())
+        return f"{cls}(keys=[{keys}])"
