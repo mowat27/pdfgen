@@ -8,17 +8,42 @@ MAKEFLAGS += --warn-undefined-variables
 MAKEFLAGS += --no-builtin-rules
 
 DOCKER_BUILD_SENTINAL := docker_build.sentinal
+DOCKER_IMAGE := pdfgen-generate:latest
+INIT_SCRIPT := lib/init.sh
+
+PYFILES := $(shell find . -type f -name '*.py'  -maxdepth 1) 
+PACKAGES := $(shell find . -type d -maxdepth 1 ! -path . ! -path ./build) 
+DEPS := ../aws ../requirements.txt
+
+SOURCES := $(PYFILES) $(PACKAGES) $(DEPS)
+
+
+# Targets for making things
 
 .PHONY: image
 
-image: $(DOCKER_BUILD_SENTINAL)
+image: $(DOCKER_BUILD_SENTINAL) build
 
-$(DOCKER_BUILD_SENTINAL): Dockerfile requirements.txt
-	docker build -t pdfgen-generate:latest .
+$(DOCKER_BUILD_SENTINAL): Dockerfile build
+	docker build -t $(DOCKER_IMAGE) .
 	touch $(DOCKER_BUILD_SENTINAL)
 
-requirements.txt:
-	cp ../requirements.txt .
+build: $(SOURCES)
+	@rm -rf build 
+	@mkdir build
+	@cp -r $(SOURCES) build
+	@ls -l build
 
 clean:
-	rm $(DOCKER_BUILD_SENTINAL)
+	rm -f $(DOCKER_BUILD_SENTINAL)
+	rm -rf build
+
+# Targets for running things
+
+.PHONY: run shell 
+
+run: image
+	docker run --rm -it $(DOCKER_IMAGE)
+
+shell: image
+	docker run --rm -it $(DOCKER_IMAGE) /bin/bash -l
