@@ -1,3 +1,4 @@
+from datetime import datetime, timezone, timedelta
 import sys
 from signal import SIGINT, signal
 
@@ -33,18 +34,39 @@ def log(message, error=False):
 
 
 def send_documents(message):
+    expiration = ONE_WEEK
+    expires = datetime.now(tz=timezone.utc) + timedelta(seconds=expiration)
+
     for obj in get_s3_objects(message):
         signed_url = create_presigned_url(
             bucket_name=obj.bucket,
             object_name=obj.key,
-            expiration=ONE_WEEK)
+            expiration=expiration)
 
         callback = obj.metadata['callback_url']
 
         if signed_url is not None:
             log(f'Notifying {callback}')
+
             try:
-                response = requests.put(callback, data={'url': signed_url})
+                response = requests.put(callback, json={
+                    "data": {
+                        "type": "pdf_document",
+                        "attributes": {
+                            "url": signed_url,
+                            "expires": expires.isoformat()
+                        },
+                        "relationships": {
+                            "requester": {
+                                "data": {
+                                    "document_id": obj.metadata['id'],
+                                    "name": obj.metadata['owner'],
+                                    "version": obj.metadata['version']
+                                }
+                            }
+                        }
+                    }
+                })
                 if response.status_code == 200:
                     log(f'SUCCESS: Notified {callback}')
                     log(f'  S3 Object: {obj.s3_url}')

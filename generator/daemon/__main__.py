@@ -1,6 +1,7 @@
 import pathlib
 import json
 import time
+import sys
 from signal import SIGINT, signal
 
 import jinja2
@@ -31,14 +32,17 @@ def pdf_from_html(html):
 
 
 def maker(message):
-    content = json.loads(message.body['document']['content'])
-    html = make_html('./templates/simple.html.j2', content)
+    html = make_html('./templates/simple.html.j2',
+                     message.body['data']['attributes'])
     pdf.upload_to_s3(
         document=pdf_from_html(html),
         bucket=S3_BUCKET_FOR_OUTPUT,
         metadata={
-            'creator': message.body['generated_by'],
-            'callback_url': message.body['callback_url']
+            'owner': message.body['meta']['owner'],
+            'type': message.body['data']['type'],
+            'id': str(message.body['data']['id']),
+            'version': message.body['data']['attributes']['version'],
+            'callback_url': message.body['links']['callback']
         })
 
 
@@ -47,17 +51,17 @@ def mkdir_p(path):
 
 
 def debug_file_maker(message):
-    content = json.loads(message.body['document']['content'])
-    html = make_html('./templates/simple.html.j2', content)
+    html = make_html('./templates/simple.html.j2',
+                     message.body['data']['attributes'])
     mkdir_p('./www/debug')
     with open('./www/debug/index.html', 'w') as f:
         f.write(html)
 
 
 def logger(message):
-    content = json.loads(message.body['document']['content'])
-    name = content['name']
-    print(f'Making a pdf for {name}', flush=True)
+    name = message.body['data']['attributes']['name']
+    version = message.body['data']['attributes']['version']
+    print(f'Making a pdf for "{name}" version {version}', flush=True)
 
 
 sqs.poller.start(queue=SQS_INPUT_QUEUE,

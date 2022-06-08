@@ -20,6 +20,10 @@ down:
 up!:
 	docker-compose up -d
 
+restart: down up
+
+restart: down up!
+
 build:
 	docker-compose build
 
