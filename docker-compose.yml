@@ -8,12 +8,12 @@ services:
       - ./:/usr/src/app
       - ~/.aws:/root/.aws
     env_file: .env
-  notifier:
-    build: 
-      context: .
-      dockerfile: notifier/Dockerfile
-    network_mode: "host"
-    volumes: 
-      - ./:/usr/src/app
-      - ~/.aws:/root/.aws
-    env_file: .env
+  # notifier:
+  #   build: 
+  #     context: .
+  #     dockerfile: notifier/Dockerfile
+  #   network_mode: "host"
+  #   volumes: 
+  #     - ./:/usr/src/app
+  #     - ~/.aws:/root/.aws
+  #   env_file: .env
